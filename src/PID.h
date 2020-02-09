@@ -80,6 +80,9 @@ class PID {
   double tolerance;
   uWS::WebSocket<uWS::SERVER> ws;
   int numSteps;
+  double dp;
+  double di;
+  double dd;
 };
 
 #endif  // PID_H

@@ -12,6 +12,9 @@ void PID::Init(double Kp_, double Ki_, double Kd_, bool twiddle_, int twiddleSte
 	Kp = Kp_;
        	Ki = Ki_;
        	Kd = Kd_;
+	dp = 0.1 * Kp;
+	di = 0.1 * Ki;
+	dd = 0.1 * Kd;
        	twiddle = twiddle_;
 	twiddleSteps = twiddleSteps_;
 	warmupSteps = warmupSteps_;
