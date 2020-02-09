@@ -33,12 +33,12 @@ string hasData(string s) {
 int main() {
   uWS::Hub h;
 
-  double Kp = 0.2;
-  double Ki = 0.0001;
-  double Kd = 3.0;
+  double Kp = 1e-8; // 0.2;
+  double Ki = 1e-8; //0.0001;
+  double Kd = 1e-8; //3.0;
   bool twiddle = true;
-  int warmupSteps = 1000;
-  int twiddleSteps = 2000;
+  int warmupSteps = 100;
+  int twiddleSteps = 200;
   double tolerance = 0.001;
 
   PID pid;

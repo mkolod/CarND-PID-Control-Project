@@ -1,5 +1,8 @@
 #include "PID.h"
 
+#include <cmath>
+#include <limits>
+
 /**
  * TODO: Complete the PID class. You may add any additional desired functions.
  */
@@ -8,40 +11,44 @@ PID::PID() {}
 
 PID::~PID() {}
 
-void PID::Init(double Kp_, double Ki_, double Kd_, bool twiddle_, int twiddleSteps_, int warmupSteps_, double tolerance_) {
-	Kp = Kp_;
-       	Ki = Ki_;
-       	Kd = Kd_;
-	dp = 0.1 * Kp;
-	di = 0.1 * Ki;
-	dd = 0.1 * Kd;
-       	twiddle = twiddle_;
-	twiddleSteps = twiddleSteps_;
-	warmupSteps = warmupSteps_;
-	p_error = 0.0;
-       	i_error = 0.0;
-       	d_error = 0.0;
-	tolerance_ = tolerance;
-	numSteps = 0;
+void PID::Init(double Kp_, double Ki_, double Kd_, bool twiddle_,
+               int twiddleSteps_, int warmupSteps_, double tolerance_) {
+  prevCoeffs = coeffs = {Kp_, Ki_, Kd_};
+  for (int i = 0; i < coeffs.size(); ++i) {
+    deltas[i] = 0.1 * coeffs[i];
+    errors[i] = 0.0;
+  }
+
+  twiddle = twiddle_;
+  tolerance = tolerance_;
+  twiddleSteps = twiddleSteps_;
+  warmupSteps = warmupSteps_;
+  tolerance_ = tolerance;
+  numSteps = 0;
+  twiddleStage = 0;
+  twiddleParam = 0;
+  lastTwiddleDone = false;
+  bestError = std::numeric_limits<double>::max();
 }
 
 void PID::UpdateError(double cte) {
-  d_error = cte - p_error;
-  i_error += cte;
-  p_error = cte;
+  errors[2] = cte - errors[0];
+  errors[1] += cte;
+  errors[0] = cte;
 }
 
 double PID::TotalError() {
   /**
    * TODO: Calculate and return the total error
    */
-  return total_error; 
+  return total_error;
 }
 
 double PID::ControlOutput(double cte) {
 
   UpdateError(cte);
-  double output = -Kp * p_error - Kd * d_error - Ki * i_error;
+  double output =
+      -coeffs[0] * errors[0] - coeffs[2] * errors[2] - coeffs[1] * errors[1];
   if (output < -1) {
     output = -1;
   }
@@ -52,11 +59,17 @@ double PID::ControlOutput(double cte) {
   numSteps++;
 
   if (twiddle && numSteps == (warmupSteps + twiddleSteps)) {
+    std::cout << "\n\nFinal coefficients: ";
+    std::cout << "Kp = " << coeffs[0] << ", Ki = " << coeffs[1]
+              << ", Kd = " << coeffs[2];
+    std::cout << ", Total error = " << total_error << "\n" << std::endl;
+    Twiddle();
+    // lastTwiddleDone = true;
     numSteps = 0;
     RestartSimulator();
-    p_error = 0;
-    i_error = 0;
-    d_error = 0;
+    for (int i = 0; i < errors.size(); ++i) {
+      errors[i] = 0.0;
+    }
   }
 
   return output;
@@ -70,9 +83,37 @@ void PID::RestartSimulator() {
   ws.send(reset_txt.data(), reset_txt.length(), uWS::OpCode::TEXT);
 }
 
-void PID::SetWebsocket(uWS::WebSocket<uWS::SERVER>& ws_) {
-  ws = ws_;
-}
+void PID::SetWebsocket(uWS::WebSocket<uWS::SERVER> &ws_) { ws = ws_; }
 
 void PID::Twiddle() {
+  if (lastTwiddleDone) {
+    double totalD = 0.0;
+    for (int i = 0; i < deltas.size(); ++i) {
+      totalD += fabs(deltas[i]);
+    }
+    std::cout << "totalD: " << totalD << ", tolerance: " << tolerance
+              << std::endl;
+    if (totalD < tolerance) {
+      std::cout << "Optimization finished. Exiting" << std::endl;
+      exit(0);
+    }
+    twiddleStage = 0;
+  }
+  // TODO: fix this;
+  double currError = 0.0;
+  bool isBetter = currError < bestError;
+  switch (twiddleStage) {
+  case 0:
+    if (isBetter) {
+      bestError = currError;
+      // TODO: Assign current updates to best Kp, Ki, Kd
+      lastTwiddleDone = true;
+    } else {
+    }
+    break;
+  case 1:
+    break;
+  case 2:
+    break;
+  }
 }

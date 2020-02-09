@@ -1,7 +1,10 @@
 #ifndef PID_H
 #define PID_H
 
+#include <vector>
 #include <uWS/uWS.h>
+
+using std::vector;
 
 class PID {
  public:
@@ -59,16 +62,14 @@ class PID {
   /**
    * PID Errors
    */
-  double p_error;
-  double i_error;
-  double d_error;
+   vector<double> errors;
 
   /**
    * PID Coefficients
-   */ 
-  double Kp;
-  double Ki;
-  double Kd;
+   */
+   vector<double> prevCoeffs;
+   vector<double> coeffs;
+   vector<double> deltas;
 
   /*
    * Helper settings
@@ -83,6 +84,10 @@ class PID {
   double dp;
   double di;
   double dd;
+  int twiddleStage;
+  int twiddleParam;
+  bool lastTwiddleDone;
+  double bestError;
 };
 
 #endif  // PID_H
