@@ -1,6 +1,7 @@
 #include "PID.h"
 
 #include <cmath>
+#include <iomanip>
 #include <limits>
 
 /**
@@ -58,18 +59,24 @@ double PID::ControlOutput(double cte) {
 
   numSteps++;
 
+  if (numSteps > warmupSteps) {
+    total_error += pow(cte, 2);
+  }
+
   if (twiddle && numSteps == (warmupSteps + twiddleSteps)) {
     std::cout << "\n\nFinal coefficients: ";
     std::cout << "Kp = " << coeffs[0] << ", Ki = " << coeffs[1]
               << ", Kd = " << coeffs[2];
     std::cout << ", Total error = " << total_error << "\n" << std::endl;
     Twiddle();
+    //twiddleParam = (twiddleParam + 1) % coeffs.size();
     // lastTwiddleDone = true;
     numSteps = 0;
     RestartSimulator();
     for (int i = 0; i < errors.size(); ++i) {
       errors[i] = 0.0;
     }
+    total_error = 0.0;
   }
 
   return output;
@@ -98,33 +105,36 @@ void PID::Twiddle() {
       exit(0);
     }
     twiddleStage = 0;
+    lastTwiddleDone = false;
+    coeffs[twiddleParam] += deltas[twiddleParam];
   }
   // TODO: fix this;
-  double currError = 0.0;
-  bool isBetter = currError < bestError;
+  bool isBetter = total_error < bestError;
+  std::cout << "isBetter: " << std::boolalpha << isBetter << std::endl;
   switch (twiddleStage) {
   case 0:
     if (isBetter) {
-      bestError = currError;
+      bestError = total_error;
       // TODO: Assign current updates to best Kp, Ki, Kd
       deltas[twiddleParam] *= 1.1;
       lastTwiddleDone = true;
-    } else {
+      twiddleParam = (twiddleParam + 1) % coeffs.size();
+   } else {
       coeffs[twiddleParam] -= 2 * deltas[twiddleParam];
       twiddleStage = 1;
     }
     break;
   case 1:
     if (isBetter) {
-      bestError = currError;
+      bestError = total_error;
       deltas[twiddleParam] *= 1.1;
       lastTwiddleDone = true;
     } else {
       coeffs[twiddleParam] += deltas[twiddleParam];
       deltas[twiddleParam] *= 0.9;
     }
+    twiddleParam = (twiddleParam + 1) % coeffs.size();
     twiddleStage = 0;
-    lastTwiddleDone = true;
     break;
   }
 }

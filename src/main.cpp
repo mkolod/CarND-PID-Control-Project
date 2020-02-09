@@ -32,13 +32,12 @@ string hasData(string s) {
 
 int main() {
   uWS::Hub h;
-
-  double Kp = 1e-8; // 0.2;
-  double Ki = 1e-8; //0.0001;
-  double Kd = 1e-8; //3.0;
-  bool twiddle = true;
-  int warmupSteps = 100;
-  int twiddleSteps = 200;
+  double Kp = 0.239376;
+  double Ki = 6.75197e-05;
+  double Kd = 3.267;
+  bool twiddle = false;
+  int warmupSteps = 1000;
+  int twiddleSteps = 4000;
   double tolerance = 0.001;
 
   PID pid;
@@ -77,15 +76,10 @@ int main() {
            *   Maybe use another PID controller to control the speed!
            */
           
-          // DEBUG
-          std::cout << "CTE: " << cte << " Steering Value: " << steer_value 
-                    << std::endl;
-
           json msgJson;
           msgJson["steering_angle"] = steer_value;
           msgJson["throttle"] = 0.3;
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
-          std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
         }  // end "telemetry" if
       } else {
