@@ -49,7 +49,8 @@ The proportional term just says that if the error is $p_{error}$, the control si
 
 $control_t = \beta_p * p_{error_t} + \beta_i * i_{error_t} + \beta_d * d_{error_t}$
 
-or 
+or
+ 
 $control_t = \beta_p * error_t + \beta_i * \sum_{1}^{t}error_t + \beta_d * (error_t - error_{t-1})$
 
 
