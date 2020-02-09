@@ -50,7 +50,7 @@ The proportional term just says that if the error is $p_{error}$, the control si
 $control_t = \beta_p * p_{error_t} + \beta_i * i_{error_t} + \beta_d * d_{error_t}$
 
 or 
-$\control_t = \beta_p * error_t + \beta_i * \sum_{1}^{t}error_t + \beta_d * (error_t - error_{t-1})$
+$control_t = \beta_p * error_t + \beta_i * \sum_{1}^{t}error_t + \beta_d * (error_t - error_{t-1})$
 
 
 The proportional error will address the need to steer more if the instantaneous error is large, The integral error will compensate for drift. The derivative error will address the need to reduce steering when approaching the steady state, preventing the overshoot coming from the proportional term.
