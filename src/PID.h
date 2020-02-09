@@ -67,7 +67,6 @@ class PID {
   /**
    * PID Coefficients
    */
-   vector<double> prevCoeffs;
    vector<double> coeffs;
    vector<double> deltas;
 
@@ -81,9 +80,6 @@ class PID {
   double tolerance;
   uWS::WebSocket<uWS::SERVER> ws;
   int numSteps;
-  double dp;
-  double di;
-  double dd;
   int twiddleStage;
   int twiddleParam;
   bool lastTwiddleDone;
