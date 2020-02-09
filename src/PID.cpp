@@ -15,8 +15,8 @@ void PID::Init(double Kp_, double Ki_, double Kd_, bool twiddle_,
                int twiddleSteps_, int warmupSteps_, double tolerance_) {
   prevCoeffs = coeffs = {Kp_, Ki_, Kd_};
   for (int i = 0; i < coeffs.size(); ++i) {
-    deltas[i] = 0.1 * coeffs[i];
-    errors[i] = 0.0;
+    deltas.push_back(0.1 * coeffs[i]);
+    errors.push_back(0.0);
   }
 
   twiddle = twiddle_;
