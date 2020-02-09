@@ -47,10 +47,10 @@ As the name implies, the PID controller bases the control parameter value, in th
 
 The proportional term just says that if the error is $p_{error}$, the control signal will be some coefficient $\beta_p * error$. The integral part sums up the errors over time and multiplies the sum by some weight, i.e. $\beta_i * \sum_{1}^{t}error_t$. The accumulated error can be positive or negative, so the sum doesn't keep growing if the errors change direction. However, if the error is consistent (e.g. drift due to imbalanced wheels), then the error will grow and so will the response. The derivative term adjusts the steering angle in proportion to the difference of the error from time $t-1$ to time $t$, by some constant factor: $\beta_d * (error_t - error_{t-1})$. So, our steering angle will be:
 
-$\sphericalangle_t = \beta_p * p_{error_t} + \beta_i * i_{error_t} + \beta_d * d_{error_t}$
+$control_t = \beta_p * p_{error_t} + \beta_i * i_{error_t} + \beta_d * d_{error_t}$
 
 or 
-$\sphericalangle_t = \beta_p * error_t + \beta_i * \sum_{1}^{t}error_t + \beta_d * (error_t - error_{t-1})$
+$\control_t = \beta_p * error_t + \beta_i * \sum_{1}^{t}error_t + \beta_d * (error_t - error_{t-1})$
 
 
 The proportional error will address the need to steer more if the instantaneous error is large, The integral error will compensate for drift. The derivative error will address the need to reduce steering when approaching the steady state, preventing the overshoot coming from the proportional term.
@@ -58,8 +58,8 @@ The proportional error will address the need to steer more if the instantaneous 
 I set some values picked by a rough grid search to get a good starting point. With poor initial values, I found that even the twiddle algorithm wasn't doing well converging. The values I chose for the starting point was $\beta_p = 0.5$, $\beta_i = 1e-5$, $\beta_d = 2.5$. Then I started running twiddle, with those values as initial ones and initial deltas equal to 0.1 times the coefficient, so e.g. $\Delta_p = 0.05$, $\Delta_i = 1e-6$ and $\Delta_d = 0.25$.
 
 After some number of epochs of twiddle, I selected reasonably good values of:
-* a = 0.239376
-* b = 6.75197e-05
-* c = 3.267
+* $\beta_p = 0.239376$
+* $\beta_i = 6.75197e-05$
+* $\beta_d = 3.267$
 
 These weren't the fully-converged values, but I didn't want to wait for days to convergence. Each run would take a lot of time, because I set the roll-out to be a full lap. Running a full one-lap roll-out with fewer runs of twiddle gave me better results than more runs of just a fraction of the track. This is likely because the curvature of the various turns is different across the track, so it's better to tune less but while encountering all situations.
